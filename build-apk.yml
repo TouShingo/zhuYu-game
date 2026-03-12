@@ -1,0 +1,67 @@
+name: Build Android APK for 逐玉
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v3
+
+    - name: 设置Node.js环境
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: 设置Java JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: 设置Android SDK
+      uses: android-actions/setup-android@v2
+
+    - name: 安装Cordova
+      run: |
+        npm install -g cordova
+
+    - name: 创建Cordova项目
+      run: |
+        cordova create cordova-project com.zhuYu.game "逐玉"
+
+    - name: 复制游戏文件
+      run: |
+        cp game.html cordova-project/www/index.html
+        if [ -f manifest.json ]; then cp manifest.json cordova-project/www/; fi
+
+    - name: 添加Android平台
+      working-directory: ./cordova-project
+      run: |
+        cordova platform add android
+
+    - name: 构建APK
+      working-directory: ./cordova-project
+      run: |
+        cordova build android --debug
+
+    - name: 上传APK文件
+      uses: actions/upload-artifact@v3
+      with:
+        name: 逐玉-APK-Debug
+        path: cordova-project/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+        retention-days: 30
+
+    - name: 上传构建日志
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-logs
+        path: cordova-project/platforms/android/logs/

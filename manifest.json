@@ -1,0 +1,32 @@
+{
+  "name": "逐玉",
+  "short_name": "逐玉",
+  "description": "女性向古装逆袭剧情游戏 - 穿越题材，宫斗权谋，玄幻元素",
+  "start_url": "./game.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a0a0a",
+  "theme_color": "#1a0a0a",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "lang": "zh-CN"
+}

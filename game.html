@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>逐玉 - 古装逆袭</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Serif SC', serif;
+            background: linear-gradient(135deg, #1a0a0a 0%, #2d1f1f 50%, #1a0a0a 100%);
+            color: #f5e6d3;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: linear-gradient(135deg, #1a0a0a 0%, #2d1f1f 50%, #1a0a0a 100%);
+            position: relative;
+        }
+
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(255, 182, 193, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(147, 112, 219, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .game-header {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(180deg, rgba(45, 31, 31, 0.9) 0%, transparent 100%);
+            border-bottom: 2px solid rgba(218, 165, 32, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+
+        .game-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #d4af37 0%, #f5e6d3 50%, #d4af37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+            letter-spacing: 0.5em;
+            margin-bottom: 8px;
+        }
+
+        .game-subtitle {
+            font-size: 1rem;
+            color: #c9a86c;
+            letter-spacing: 0.3em;
+            font-style: italic;
+        }
+
+        .game-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .character-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .character-avatar {
+            width: 200px;
+            height: 280px;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 3px solid rgba(218, 165, 32, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .character-avatar::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent,
+                rgba(255, 255, 255, 0.1),
+                transparent
+            );
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+        }
+
+        .character-face {
+            width: 120px;
+            height: 160px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .character-eyes {
+            font-size: 3rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .character-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #1a0a0a;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+            letter-spacing: 0.2em;
+            z-index: 1;
+        }
+
+        .character-info {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #c9a86c;
+            font-style: italic;
+        }
+
+        .dialogue-box {
+            background: linear-gradient(135deg, rgba(45, 31, 31, 0.95) 0%, rgba(26, 10, 10, 0.95) 100%);
+            border: 2px solid rgba(218, 165, 32, 0.4);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+            min-height: 200px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .scene-location {
+            font-size: 0.9rem;
+            color: #d4af37;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(218, 165, 32, 0.3);
+            letter-spacing: 0.1em;
+        }
+
+        .scene-divider {
+            margin: 0 10px;
+            color: rgba(218, 165, 32, 0.6);
+        }
+
+        .dialogue-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #f5e6d3;
+            letter-spacing: 0.05em;
+            min-height: 100px;
+        }
+
+        .choices-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .choice-button {
+            background: linear-gradient(135deg, rgba(201, 168, 108, 0.2) 0%, rgba(218, 165, 32, 0.15) 100%);
+            border: 2px solid rgba(218, 165, 32, 0.5);
+            color: #f5e6d3;
+            padding: 18px 30px;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            letter-spacing: 0.1em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .choice-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .choice-button:hover::before {
+            left: 100%;
+        }
+
+        .choice-button:hover {
+            background: linear-gradient(135deg, rgba(218, 165, 32, 0.3) 0%, rgba(201, 168, 108, 0.25) 100%);
+            border-color: rgba(255, 215, 0, 0.7);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(218, 165, 32, 0.3);
+        }
+
+        .choice-button:active {
+            transform: translateY(0);
+        }
+
+        .game-footer {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(0deg, rgba(45, 31, 31, 0.9) 0%, transparent 100%);
+            border-top: 2px solid rgba(218, 165, 32, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+
+        .footer-decoration {
+            font-size: 0.9rem;
+            color: #c9a86c;
+            letter-spacing: 0.2em;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                left: -50%;
+                transform: rotate(45deg);
+            }
+            100% {
+                left: 150%;
+                transform: rotate(45deg);
+            }
+        }
+
+        *::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        *::-webkit-scrollbar-track {
+            background: rgba(45, 31, 31, 0.5);
+        }
+
+        *::-webkit-scrollbar-thumb {
+            background: rgba(218, 165, 32, 0.5);
+            border-radius: 4px;
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+            background: rgba(218, 165, 32, 0.7);
+        }
+
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 1.8rem;
+                letter-spacing: 0.3em;
+            }
+
+            .game-subtitle {
+                font-size: 0.85rem;
+            }
+
+            .character-avatar {
+                width: 150px;
+                height: 220px;
+            }
+
+            .character-face {
+                width: 100px;
+                height: 130px;
+            }
+
+            .dialogue-box {
+                padding: 20px;
+                min-height: 180px;
+            }
+
+            .dialogue-text {
+                font-size: 1rem;
+            }
+
+            .choice-button {
+                padding: 15px 20px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-header {
+                padding: 15px;
+            }
+
+            .game-main {
+                padding: 15px;
+            }
+
+            .character-avatar {
+                width: 120px;
+                height: 180px;
+            }
+
+            .character-face {
+                width: 80px;
+                height: 100px;
+            }
+
+            .character-eyes {
+                font-size: 2rem;
+            }
+
+            .dialogue-text {
+                font-size: 0.95rem;
+            }
+
+            .choice-button {
+                padding: 12px 15px;
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1 class="game-title">逐玉</h1>
+            <div class="game-subtitle">古装逆袭 · 穿越玄幻</div>
+        </div>
+
+        <div class="game-main" id="game-main">
+            <!-- 游戏内容将通过JavaScript动态生成 -->
+        </div>
+
+        <div class="game-footer">
+            <div class="footer-decoration">
+                🌸 月下逢 · 逆风行 · 定乾坤 🌸
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 游戏数据
+        const characterData = {
+            '樊长玉': {
+                gradient: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+                eyes: '🟤',
+                description: '穿越女主，聪慧坚韧'
+            },
+            '谢征': {
+                gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                eyes: '🔵',
+                description: '落魄侯爷，深藏不露'
+            },
+            '萧尘': {
+                gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+                eyes: '🟣',
+                description: '神秘修仙者，五百年等待'
+            },
+            '丫鬟': {
+                gradient: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
+                eyes: '🟡',
+                description: '忠心丫鬟'
+            },
+            '说书人': {
+                gradient: 'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)',
+                eyes: '🟢',
+                description: '茶楼说书人'
+            },
+            '神秘长老': {
+                gradient: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)',
+                eyes: '🔵',
+                description: '武林门派长老'
+            }
+        };
+
+        const storyChapters = [
+            {
+                chapter: 1,
+                title: '缘起',
+                scenes: [
+                    {
+                        id: '1-1',
+                        location: '现代卧室 → 古代厢房',
+                        background: '穿越醒来',
+                        speaker: null,
+                        text: '你在现代的医院手术台上闭上了眼睛。再睁开时，映入眼帘的是古色古香的木质横梁，淡香入鼻...',
+                        choices: [
+                            { text: '观察四周', next: '1-2-观察' },
+                            { text: '呼救', next: '1-2-呼救' }
+                        ]
+                    },
+                    {
+                        id: '1-2-观察',
+                        location: '厢房',
+                        background: '铜镜',
+                        speaker: '樊长玉',
+                        text: '你走到铜镜前，映照出一张陌生的脸庞——瓜子脸，梨涡浅笑，眉宇间有一股英气。这不是你，但又好像是你...',
+                        choices: [
+                            { text: '继续探索', next: '1-3' }
+                        ]
+                    },
+                    {
+                        id: '1-2-呼救',
+                        location: '厢房',
+                        background: '丫鬟出现',
+                        speaker: '丫鬟',
+                        text: '小姐！您醒了？您晕倒三天了，老奴都要吓死了！小姐，您是不是又不舒服了？',
+                        choices: [
+                            { text: '询问情况', next: '1-3-询问' },
+                            { text: '暂时沉默', next: '1-3' }
+                        ]
+                    },
+                    {
+                        id: '1-3-询问',
+                        location: '厢房',
+                        background: '了解身份',
+                        speaker: '樊长玉',
+                        text: '丫鬟将你的身世一一说来——你是樊家长女樊长玉，父亲是已故的大将军，家族如今已日落西山...',
+                        choices: [
+                            { text: '接受现实', next: '1-3' }
+                        ]
+                    },
+                    {
+                        id: '1-3',
+                        location: '府邸门外',
+                        background: '偶遇男主',
+                        speaker: '谢征',
+                        text: '门外传来马蹄声。一辆青篷马车停下，一位白衣青年走下来。他身形修长，面色微白，似是病体初愈。但他看向你的眼神，深邃如潭，仿佛能洞穿一切。',
+                        choices: [
+                            { text: '主动上前', next: '1-4-上前' },
+                            { text: '默默观察', next: '1-4-观察' }
+                        ]
+                    },
+                    {
+                        id: '1-4-上前',
+                        location: '府邸门前',
+                        background: '初次交锋',
+                        speaker: '谢征',
+                        text: '他微微欠身："在下谢征，久闻樊将军之女英名，今日一见，果然名不虚传。"他的声音温润如玉，但话里似乎另有深意...',
+                        choices: [
+                            { text: '不卑不亢回应', next: '2-1' }
+                        ]
+                    },
+                    {
+                        id: '1-4-观察',
+                        location: '府邸门前',
+                        background: '远观',
+                        speaker: '樊长玉',
+                        text: '你没有上前，只是远远观察。这个自称谢征的青年，看似温和无害，但他周身气场却令人警惕。你是从现代穿越而来，看人从不只看表面...',
+                        choices: [
+                            { text: '他应该不是简单的人', next: '2-1' }
+                        ]
+                    }
+                ]
+            },
+            {
+                chapter: 2,
+                title: '入局',
+                scenes: [
+                    {
+                        id: '2-1',
+                        location: '茶楼',
+                        background: '听消息',
+                        speaker: '说书人',
+                        text: '几日后，你在茶楼听说消息——当今圣上欲在京城设科举，为寒门子弟开仕途之路。同时，朝中两大派系明争暗斗，江湖上也不平静...',
+                        choices: [
+                            { text: '参加科举', next: '2-2-科举' },
+                            { text: '另寻他路', next: '2-2-江湖' }
+                        ]
+                    },
+                    {
+                        id: '2-2-科举',
+                        location: '考场',
+                        background: '展现才华',
+                        speaker: '樊长玉',
+                        text: '你决定走科举之路。凭借现代知识和前身的学识，你顺利通过县试、府试，最终在京城会试中脱颖而出。你的策论一鸣惊人，引得考官惊叹——女子亦可经国济世！',
+                        choices: [
+                            { text: '继续', next: '3-1' }
+                        ]
+                    },
+                    {
+                        id: '2-2-江湖',
+                        location: '武林门派',
+                        background: '武艺修炼',
+                        speaker: '神秘长老',
+                        text: '你选择进入江湖，拜入一个没落的武学门派。你发现自己天赋异禀，武艺精进神速。某日深夜，你在修炼中，体内涌现一股神秘力量——那是穿越者才有的灵力觉醒！',
+                        choices: [
+                            { text: '探索灵力', next: '2-3-灵力' }
+                        ]
+                    },
+                    {
+                        id: '2-3-灵力',
+                        location: '修炼之地',
+                        background: '遇见萧尘',
+                        speaker: '萧尘',
+                        text: '突然，一道银光从天而降。一位银发男子御剑而来，他淡紫色的眼眸看着你："你醒了，我的命定之人。五百年了，我终于等到你..."',
+                        choices: [
+                            { text: '询问真相', next: '2-4-真相' }
+                        ]
+                    },
+                    {
+                        id: '2-4-真相',
+                        location: '仙境',
+                        background: '身世揭秘',
+                        speaker: '萧尘',
+                        text: '萧尘将你的前世一一说来——你本是上界灵女，因私动情念被贬下凡，转世经历轮回。每一世你都会遇到命中之人，解开自己的使命...',
+                        choices: [
+                            { text: '接受使命', next: '3-1' }
+                        ]
+                    }
+                ]
+            },
+            {
+                chapter: 3,
+                title: '破局',
+                scenes: [
+                    {
+                        id: '3-1',
+                        location: '朝堂/江湖',
+                        background: '风云变幻',
+                        speaker: null,
+                        text: '随着你的成长，朝堂和江湖的局势开始变化。你发现谢征的真实身份——他不仅是落魄侯爷，更是前朝遗孤，肩负着家族血仇...',
+                        choices: [
+                            { text: '与他合作', next: '3-2-合作' },
+                            { text: '保持距离', next: '3-2-保持' }
+                        ]
+                    },
+                    {
+                        id: '3-2-合作',
+                        location: '密室',
+                        background: '密谋',
+                        speaker: '谢征',
+                        text: '在昏暗的烛光下，谢征终于卸下伪装："长玉，我从不轻易相信别人，但你是例外。"他的眼中闪过一丝温柔，"我想要夺回属于我的东西，你愿意与我并肩吗？"',
+                        choices: [
+                            { text: '愿意', next: '3-3-愿意' }
+                        ]
+                    },
+                    {
+                        id: '3-2-保持',
+                        location: '各自为战',
+                        background: '独自前行',
+                        speaker: '樊长玉',
+                        text: '你决定先保持距离观察。虽然心中对他有莫名的好感，但你知道，这条路注定孤独。你要用自己的方式，在这乱世中闯出一片天地...',
+                        choices: [
+                            { text: '继续', next: '3-3' }
+                        ]
+                    },
+                    {
+                        id: '3-3-愿意',
+                        location: '共同谋划',
+                        background: '结盟',
+                        speaker: '谢征',
+                        text: '你与谢征达成结盟。从此，你们开始暗中布局，一步步瓦解敌对势力。在这个过程中，你们的感情也在悄然滋长...',
+                        choices: [
+                            { text: '告白', next: '4-1-谢征' },
+                            { text: '继续事业', next: '4-1-事业' }
+                        ]
+                    },
+                    {
+                        id: '3-3',
+                        location: '独自奋斗',
+                        background: '建立势力',
+                        speaker: '樊长玉',
+                        text: '你凭借自己的能力，在朝廷和江湖中都建立了声望。越来越多的有识之士开始追随你。你知道，时机已到...',
+                        choices: [
+                            { text: '起事', next: '4-1' }
+                        ]
+                    }
+                ]
+            },
+            {
+                chapter: 4,
+                title: '终章',
+                scenes: [
+                    {
+                        id: '4-1',
+                        location: '大殿',
+                        background: '最终对决',
+                        speaker: null,
+                        text: '你终于来到了权力的巅峰。但此时，一个更大的秘密被揭开——原来这一切，都是上古灵界的试炼。通过考验者，将获得真正的力量...',
+                        choices: [
+                            { text: '接受力量', next: '4-2-成神' },
+                            { text: '回归凡尘', next: '4-2-凡尘' }
+                        ]
+                    },
+                    {
+                        id: '4-1-谢征',
+                        location: '月光下',
+                        background: '告白',
+                        speaker: '谢征',
+                        text: '月色如水，谢征看着你，眼中满是柔情："长玉，从遇见你的那一刻起，我就知道，你是我今生唯一的例外。我愿意为你放弃一切，只求与你相守一生..."',
+                        choices: [
+                            { text: '接受他的爱', next: '4-2-HE' }
+                        ]
+                    },
+                    {
+                        id: '4-2-HE',
+                        location: '大结局',
+                        background: '幸福结局',
+                        speaker: '谢征 & 樊长玉',
+                        text: '你们携手推翻了腐朽的王朝，建立了新的秩序。在登基大典上，你宣布废黜帝制，建立新政。百姓欢呼，万民敬仰。夜幕降临，你在城楼上眺望星空，身后是谢征温暖的怀抱。你们知道，这不是结束，而是新的开始...',
+                        choices: [
+                            { text: '结局达成', next: 'END' }
+                        ]
+                    },
+                    {
+                        id: '4-2-成神',
+                        location: '灵界',
+                        background: '飞升',
+                        speaker: '萧尘',
+                        text: '萧尘微笑着伸出手："你通过了所有考验，现在，你可以回归灵界了。"你犹豫了——回到灵界，意味着永生，但也意味着尘世的羁绊将全部斩断...',
+                        choices: [
+                            { text: '选择飞升', next: 'END-成神' },
+                            { text: '留在人间', next: '4-2-HE' }
+                        ]
+                    },
+                    {
+                        id: '4-2-凡尘',
+                        location: '人间',
+                        background: '归隐',
+                        speaker: '樊长玉',
+                        text: '你拒绝了成神的机会，选择留在人间。你觉得，与其成为高高在上的神，不如做一个有血有肉的人，体验真正的生活。于是，你与谢征（或萧尘）隐居江湖，从此相守白头...',
+                        choices: [
+                            { text: '结局达成', next: 'END-归隐' }
+                        ]
+                    },
+                    {
+                        id: 'END',
+                        location: '结束界面',
+                        background: '感谢游玩',
+                        speaker: null,
+                        text: '【逐玉】第一章节结束\n\n感谢您的体验！\n\n您的选择决定了不同的结局。\n期待在下一章继续您的传奇...',
+                        choices: [
+                            { text: '重新开始', next: '1-1' }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        // 游戏状态
+        let currentScene = '1-1';
+        let isTyping = false;
+
+        // 查找场景
+        function findScene(sceneId) {
+            for (const chapter of storyChapters) {
+                const found = chapter.scenes.find(s => s.id === sceneId);
+                if (found) return found;
+            }
+            return null;
+        }
+
+        // 打字机效果
+        function typeText(element, text, callback) {
+            isTyping = true;
+            element.textContent = '';
+            let index = 0;
+
+            function type() {
+                if (index < text.length) {
+                    element.textContent += text.charAt(index);
+                    index++;
+                    setTimeout(type, 30);
+                } else {
+                    isTyping = false;
+                    if (callback) callback();
+                }
+            }
+
+            type();
+        }
+
+        // 渲染场景
+        function renderScene(sceneId) {
+            const scene = findScene(sceneId);
+            if (!scene) return;
+
+            const gameMain = document.getElementById('game-main');
+            gameMain.innerHTML = '';
+
+            // 角色显示
+            if (scene.speaker) {
+                const charData = characterData[scene.speaker];
+                if (charData) {
+                    const charDiv = document.createElement('div');
+                    charDiv.className = 'character-display';
+                    charDiv.innerHTML = `
+                        <div class="character-avatar" style="background: ${charData.gradient}">
+                            <div class="character-face">
+                                <div class="character-eyes">${charData.eyes}</div>
+                            </div>
+                            <div class="character-name">${scene.speaker}</div>
+                        </div>
+                        <div class="character-info">${charData.description}</div>
+                    `;
+                    gameMain.appendChild(charDiv);
+                }
+            }
+
+            // 对话框
+            const dialogueBox = document.createElement('div');
+            dialogueBox.className = 'dialogue-box';
+
+            if (scene.location || scene.background) {
+                let locationText = '';
+                if (scene.location) locationText += `📍 ${scene.location}`;
+                if (scene.background) {
+                    if (locationText) locationText += '<span class="scene-divider">|</span>';
+                    locationText += scene.background;
+                }
+                const locationDiv = document.createElement('div');
+                locationDiv.className = 'scene-location';
+                locationDiv.innerHTML = locationText;
+                dialogueBox.appendChild(locationDiv);
+            }
+
+            const dialogueText = document.createElement('div');
+            dialogueText.className = 'dialogue-text';
+            dialogueBox.appendChild(dialogueText);
+
+            gameMain.appendChild(dialogueBox);
+
+            // 打字机效果显示文本
+            typeText(dialogueText, scene.text, () => {
+                // 显示选择按钮
+                if (scene.choices && scene.choices.length > 0) {
+                    const choicesContainer = document.createElement('div');
+                    choicesContainer.className = 'choices-container';
+
+                    scene.choices.forEach(choice => {
+                        const button = document.createElement('button');
+                        button.className = 'choice-button';
+                        button.textContent = choice.text;
+                        button.onclick = () => {
+                            currentScene = choice.next;
+                            renderScene(currentScene);
+                            window.scrollTo(0, 0);
+                        };
+                        choicesContainer.appendChild(button);
+                    });
+
+                    gameMain.appendChild(choicesContainer);
+                }
+            });
+        }
+
+        // 初始化游戏
+        document.addEventListener('DOMContentLoaded', () => {
+            renderScene(currentScene);
+        });
+    </script>
+</body>
+</html>
